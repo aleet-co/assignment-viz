@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["tzajac-aleet <t.zajac@aleet.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.88.0"
+boto3 = "^1.26.24"
+
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = "^0.20.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
