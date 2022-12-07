@@ -1,5 +1,7 @@
 import { Link, useLoaderData } from "react-router-dom";
 
+import { getAssignmentIds } from "./api";
+
 export default function Dashboard() {
   const assignments = useLoaderData();
   return (
@@ -18,5 +20,5 @@ export default function Dashboard() {
 }
 
 export async function loader() {
-  return ["abc", "def"];
+  return getAssignmentIds();
 }

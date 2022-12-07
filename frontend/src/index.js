@@ -7,6 +7,8 @@ import Viz, { loader as vizLoader } from "./viz";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
 
+import "maplibre-gl/dist/maplibre-gl.css";
+
 const router = createBrowserRouter([
   {
     path: "/",
