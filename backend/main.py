@@ -1,7 +1,9 @@
-from typing import Union
-
+import json
+import boto3
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+s3 = boto3.client("s3")
 
 app = FastAPI()
 
@@ -18,12 +20,44 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+BUCKET_PREFIX = "vizyah-678-assignments"  # , "vizyah-dev-assignments-"]
+REQ_BUCKET = f"{BUCKET_PREFIX}-requests"
+RES_BUCKET = f"{BUCKET_PREFIX}-responses"
+
+# Files contain a timestamp in their name. Strip that, use just the parent folder.
+def get_key(id):
+    [a, b, _] = id.split("/", maxsplit=2)
+    return f"{a}/{b}"
+
+
+def get_only_item_in_dir(bucket, dir):
+    objects = s3.list_objects_v2(Bucket=bucket, Prefix=dir)["Contents"]
+    assert len(objects) == 1
+    return objects[0]["Key"]
+
 
 @app.get("/")
 def get_assignments():
-    return ["abc", "def"]
+    objects = s3.list_objects_v2(Bucket=REQ_BUCKET)["Contents"]
+    return [get_key(obj["Key"]) for obj in objects]
 
 
-@app.get("/{id}")
+@app.get("/{id:path}")
 def get_assignment(id: str):
-    return {"driverA": [{"lat": 52.23, "lon": 21.03}]}
+    request_key = get_only_item_in_dir(bucket=REQ_BUCKET, dir=id)
+    response_key = get_only_item_in_dir(bucket=RES_BUCKET, dir=id)
+    request = json.load(s3.get_object(Bucket=REQ_BUCKET, Key=request_key)["Body"])
+    response = json.load(s3.get_object(Bucket=RES_BUCKET, Key=response_key)["Body"])
+    tasks = {
+        task["taskToken"]: {
+            "lat": task["location"]["latitude"],
+            "lon": task["location"]["longitude"],
+            "time": task.get("preferredTime"),
+        }
+        for booking in request["bookings"]
+        for task in booking["tasks"]
+    }
+    return {
+        plan["vehicleToken"]: [tasks[task["taskToken"]] for task in plan["tasks"]]
+        for plan in response["assignment"]
+    }

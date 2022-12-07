@@ -11,7 +11,7 @@ export default function Dashboard() {
         {assignments.map((x) => (
           <li key={x}>
             {" "}
-            <Link to={`/${x}`}> {x}</Link>{" "}
+            <Link to={`/${encodeURIComponent(x)}`}>{x}</Link>{" "}
           </li>
         ))}
       </ul>
