@@ -27,7 +27,7 @@ RES_BUCKET = f"{BUCKET_PREFIX}-responses"
 # Files contain a timestamp in their name. Strip that, use just the parent folder.
 def get_key(id):
     [a, b, _] = id.split("/", maxsplit=2)
-    return f"{a}/{b}"
+    return f"{a}/{b}/"
 
 
 def get_only_item_in_dir(bucket, dir):
