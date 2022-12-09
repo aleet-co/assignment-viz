@@ -25,15 +25,22 @@ const MapViz = ({ data }) => {
   );
 };
 
+function randomInteger(max) {
+  return Math.floor(Math.random() * (max + 1));
+}
+
+function randomRgbColor() {
+  let r = randomInteger(255);
+  let g = randomInteger(255);
+  let b = randomInteger(255);
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 export default function Viz() {
   const assignment = useLoaderData();
 
-  const colors = ["red", "green", "blue", "yellow", "pink", "cyan"];
   const driverToColor = Object.fromEntries(
-    Object.keys(assignment).map((driverId, i) => [
-      driverId,
-      colors[i % colors.length],
-    ])
+    Object.keys(assignment).map((driverId) => [driverId, randomRgbColor()])
   );
 
   const data = Object.entries(assignment)
