@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-BUCKET_PREFIX = "vizyah-678-assignments"  # , "vizyah-dev-assignments-"]
+BUCKET_PREFIX = "vizyah-dev-assignments"
 REQ_BUCKET = f"{BUCKET_PREFIX}-requests"
 RES_BUCKET = f"{BUCKET_PREFIX}-responses"
 
