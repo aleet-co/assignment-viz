@@ -30,10 +30,12 @@ def get_key(id):
     return f"{a}/{b}/"
 
 
-def get_only_item_in_dir(bucket, dir):
+# If there's more than 1 object, just take the one with the "largest" name.
+# The only dynamic part in the content is the timestamp, so largest == newest.
+def get_first_object_in_dir(bucket, dir):
     objects = s3.list_objects_v2(Bucket=bucket, Prefix=dir)["Contents"]
-    assert len(objects) == 1
-    return objects[0]["Key"]
+    assert len(objects) > 0
+    return max(obj["Key"] for obj in objects)
 
 
 @app.get("/")
@@ -44,8 +46,8 @@ def get_assignments():
 
 @app.get("/{id:path}")
 def get_assignment(id: str):
-    request_key = get_only_item_in_dir(bucket=REQ_BUCKET, dir=id)
-    response_key = get_only_item_in_dir(bucket=RES_BUCKET, dir=id)
+    request_key = get_first_object_in_dir(bucket=REQ_BUCKET, dir=id)
+    response_key = get_first_object_in_dir(bucket=RES_BUCKET, dir=id)
     request = json.load(s3.get_object(Bucket=REQ_BUCKET, Key=request_key)["Body"])
     response = json.load(s3.get_object(Bucket=RES_BUCKET, Key=response_key)["Body"])
     tasks = {
