@@ -21,19 +21,19 @@ app.add_middleware(
 )
 
 BUCKET_PREFIX = "vizyah-dev-assignments"
-REQ_BUCKET = f"{BUCKET_PREFIX}-requests"
-RES_BUCKET = f"{BUCKET_PREFIX}-responses"
+REQ_BUCKET = f"assignment-dev-generic-assignment-requests"
+RES_BUCKET = f"vizyah-dev-assignments-responses"
 
 # Files contain a timestamp in their name. Strip that, use just the parent folder.
 def get_key(id):
-    [a, b, _] = id.split("/", maxsplit=2)
-    return f"{a}/{b}/"
+    as_id = id.split("-", maxsplit=7)
+    return as_id[7].removesuffix('-request.json')
 
 
 # If there's more than 1 object, just take the one with the "largest" name.
 # The only dynamic part in the content is the timestamp, so largest == newest.
 def get_first_object_in_dir(bucket, dir):
-    objects = s3.list_objects_v2(Bucket=bucket, Prefix=dir)["Contents"]
+    objects = s3.list_objects_v2(Bucket=bucket)["Contents"]
     assert len(objects) > 0
     return max(obj["Key"] for obj in objects)
 
@@ -41,13 +41,13 @@ def get_first_object_in_dir(bucket, dir):
 @app.get("/")
 def get_assignments():
     objects = s3.list_objects_v2(Bucket=REQ_BUCKET)["Contents"]
-    return [get_key(obj["Key"]) for obj in objects]
+    return [obj["Key"] for obj in objects]
 
 
 @app.get("/{id:path}")
 def get_assignment(id: str):
-    request_key = get_first_object_in_dir(bucket=REQ_BUCKET, dir=id)
-    response_key = get_first_object_in_dir(bucket=RES_BUCKET, dir=id)
+    request_key = id
+    response_key = f"{get_key(id)}-response.json"
     request = json.load(s3.get_object(Bucket=REQ_BUCKET, Key=request_key)["Body"])
     response = json.load(s3.get_object(Bucket=RES_BUCKET, Key=response_key)["Body"])
     tasks = {
